@@ -18,7 +18,6 @@ defmodule XTools.Supervisor do
 
     Supervisor.init(
       [
-        {DynamicSupervisor, name: XTools.SockSupervisor},
         worker(SockPeer, [])
       ] ++ children,
       strategy: :one_for_one

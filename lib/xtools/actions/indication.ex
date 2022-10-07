@@ -8,30 +8,31 @@ defmodule XTools.Actions.Indication do
   @rport Application.get_env(:xtools, :remote_port, 51000)
 
   def run(%{xor_peer_address: xpa, username: username, nonce: nonce, realm: realm}) do
-    Stun.encode(%Stun{
-      class: :indication,
-      method: :send,
-      transactionid: @tid,
-      attrs: %{data: @data, xor_peer_address: xpa}
-    })
+    {Stun.encode(%Stun{
+       class: :indication,
+       method: :send,
+       transactionid: @tid,
+       attrs: %{data: @data, xor_peer_address: xpa}
+     }), nil}
   end
 
-  def resolve(msg) do
+  def resolve(msg, _) do
     case Stun.decode(msg) do
       {:ok,
-        %XTools.Stun{
-          class: :indication,
-          method: :data,
-          transactionid: _,
-          fingerprint: true,
-          attrs: %{
-            data: @data,
-            xor_peer_address: {@rip, @rport}
-          }
-        }} ->
+       %XTools.Stun{
+         class: :indication,
+         method: :data,
+         transactionid: _,
+         fingerprint: true,
+         attrs: %{
+           data: @data,
+           xor_peer_address: {@rip, @rport}
+         }
+       }} ->
         {:ok, %{}}
 
-      _ ->
+      e ->
+        Logger.debug("#{inspect(e)}")
         :error
     end
   end

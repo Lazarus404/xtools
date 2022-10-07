@@ -3,7 +3,7 @@ defmodule XTools.SockImpl do
   use Bitwise
   require Logger
 
-  alias XTools.{SockSupervisor, SockPeer}
+  alias XTools.SockPeer
 
   @stun_magic_cookie 0x2112A442
   @buf_size 1024 * 1024 * 16
@@ -31,9 +31,11 @@ defmodule XTools.SockImpl do
          ts <- ms * 1_000_000 + s,
          username <- "#{ts + 86400}:#{UUID.uuid1()}" do
       Process.flag(:trap_exit, true)
+
       {:ok,
        %{
          socket: socket,
+         key: nil,
          turn_state: %{
            uri: uri,
            username: username,
@@ -52,11 +54,14 @@ defmodule XTools.SockImpl do
         :timeout,
         %{
           socket: socket,
-          actions: []
+          actions: [],
+          turn_state: %{
+            uri: uri
+          }
         } = state
       ) do
     Socket.Protocol.close(socket)
-    Logger.debug("Task list complete for #{__MODULE__}")
+    Logger.info("Task list complete for #{to_string(uri)}")
     {:stop, :shutdown, state}
   end
 
@@ -69,7 +74,8 @@ defmodule XTools.SockImpl do
         } = state
       ) do
     Logger.debug("calling run on #{inspect(action)}")
-    res = action.run(turn_state)
+    {res, key} = action.run(turn_state)
+    state = if not is_nil(key), do: Map.put(state, :key, key), else: state
     send(socket, uri, res)
     {:noreply, state, @stack_delay}
   end
@@ -79,6 +85,7 @@ defmodule XTools.SockImpl do
         {:udp, socket, ip, port, packet},
         %{
           socket: socket,
+          key: key,
           turn_state: turn_state,
           actions: [action | rest]
         } = state
@@ -86,7 +93,7 @@ defmodule XTools.SockImpl do
     Logger.debug("calling resolve for #{inspect(action)}")
     Socket.Protocol.options(socket, mode: :once)
 
-    with {:ok, resp} <- action.resolve(packet) do
+    with {:ok, resp} <- action.resolve(packet, key) do
       {:noreply, %{state | turn_state: Map.merge(turn_state, resp), actions: rest}, @stack_delay}
     else
       {:error, new_state} ->
@@ -102,6 +109,7 @@ defmodule XTools.SockImpl do
         {:tcp, socket, packet},
         %{
           socket: socket,
+          key: key,
           turn_state: turn_state,
           actions: [action | rest]
         } = state
@@ -109,7 +117,7 @@ defmodule XTools.SockImpl do
     Logger.debug("calling resolve for #{inspect(action)}")
     Socket.Protocol.options(socket, mode: :once)
 
-    with {:ok, resp} <- action.resolve(packet) do
+    with {:ok, resp} <- action.resolve(packet, key) do
       {:noreply, %{state | turn_state: Map.merge(turn_state, resp), actions: rest}, @stack_delay}
     else
       {:error, new_state} ->

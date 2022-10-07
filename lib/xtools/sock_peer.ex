@@ -24,14 +24,17 @@ defmodule XTools.SockPeer do
 
   def init([]) do
     Logger.debug("Peer init")
-    {:ok, socket} = :gen_udp.open(@port, [
-         {:ip, @ip},
-         {:active, :once},
-         {:buffer, 1024 * 1024 * 1024},
-         {:recbuf, 1024 * 1024 * 1024},
-         {:sndbuf, 1024 * 1024 * 1024},
-         :binary
-       ])
+
+    {:ok, socket} =
+      :gen_udp.open(@port, [
+        {:ip, @ip},
+        {:active, :once},
+        {:buffer, 1024 * 1024 * 1024},
+        {:recbuf, 1024 * 1024 * 1024},
+        {:sndbuf, 1024 * 1024 * 1024},
+        :binary
+      ])
+
     :ok = Socket.packet!(socket, :raw)
     Socket.Protocol.options(socket, mode: :once)
     {:ok, %{socket: socket, address: {@rip, @rport}}}
@@ -42,42 +45,49 @@ defmodule XTools.SockPeer do
   def handle_call(:get_socket, _from, %{socket: socket} = state), do: {:reply, socket, state}
 
   # peer connection
-  def handle_info({:udp, socket, ip, port, <<@channel_number::16, len::16, @data::binary>> = packet},
+  def handle_info(
+        {:udp, socket, ip, port, <<@channel_number::16, len::16, @data::binary>> = packet},
         %{
           socket: socket
-        } = state) do
+        } = state
+      ) do
     Logger.debug("channel data received on peer socket")
     Socket.Protocol.options(socket, mode: :once)
     ^len = byte_size(@data)
     :gen_udp.send(socket, ip, port, packet)
     {:noreply, state}
-  end  
-  def handle_info({:udp, socket, ip, port, "1234567890" = packet},
+  end
+
+  def handle_info(
+        {:udp, socket, ip, port, "1234567890" = packet},
         %{
           socket: socket
-        } = state) do
+        } = state
+      ) do
     Logger.debug("data received on peer socket")
     Socket.Protocol.options(socket, mode: :once)
     :gen_udp.send(socket, ip, port, packet)
     {:noreply, state}
   end
+
   def handle_info(
         {:udp, socket, ip, port, packet},
         %{
           socket: socket
         } = state
       ) do
-    Logger.debug("unknown data received on peer socket #{inspect packet}")
+    Logger.debug("unknown data received on peer socket #{inspect(packet)}")
     Socket.Protocol.options(socket, mode: :once)
     {:noreply, state}
   end
+
   def handle_info(
         info,
         %{
           socket: socket
         } = state
       ) do
-    Logger.debug("data received on peer socket #{inspect info}")
+    Logger.debug("data received on peer socket #{inspect(info)}")
     Socket.Protocol.options(socket, mode: :once)
     {:noreply, state}
   end

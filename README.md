@@ -1,21 +1,13 @@
-# Xtools
+# XTools
 
-**TODO: Add description**
+XTools is an Elixir built TURN server testing tool.  It performs each of the typical processes through a TURN server on several ports simultaneously, ensuring your TURN configuration is correct and useable.
 
-## Installation
+## Running
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `xtools` to your list of dependencies in `mix.exs`:
+No effort has been carried out to make this release'able.  To run, simply call;
 
 ```elixir
-def deps do
-  [
-    {:xtools, "~> 0.1.0"}
-  ]
-end
+> iex -S mix
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/xtools>.
-
+Note that you'll need to enable port tunnelling for the send indication and channel data messages to echo back through the TURN server.  To do this, I use [PlayIt.GG](https://playit.gg/).  It's very simple to use.  Once running, update the `remote_ip` and `remote_port` in the `confix.exs` file.  Also, make sure to correctly set the `local_ip` and `local_port` in the config for local socket bindings.

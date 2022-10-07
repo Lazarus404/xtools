@@ -3,20 +3,20 @@ import Config
 config :logger,
   level: :debug
 
-url = "turn1.cdg.053669555554.aircall-staging.com"
+url = "<turn_url>"
 
 config :xtools,
   listen: [
     # "udp://#{url}:80",
     # "tcp://#{url}:80",
     "udp://#{url}:3478",
-    "tcp://#{url}:3478",
+    "tcp://#{url}:3478"
     "udp://#{url}:443",
     "tcp://#{url}:443",
     "udp://#{url}:5349",
     "tcp://#{url}:5349"
   ],
-  turn_key: "41f5bea6-4624-11ed-b878-0242ac120002",
+  turn_key: "<secret_key>",
   local_ip: {192, 168, 1, 194},
   local_port: 51000,
   remote_ip: {147, 185, 221, 211},

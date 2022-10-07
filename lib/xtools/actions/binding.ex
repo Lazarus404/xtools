@@ -5,14 +5,14 @@ defmodule XTools.Actions.Binding do
   @tid 123_456_789_012
 
   def run(_state) do
-    Stun.encode(%Stun{
-      class: :request,
-      method: :binding,
-      transactionid: @tid
-    })
+    {Stun.encode(%Stun{
+       class: :request,
+       method: :binding,
+       transactionid: @tid
+     }), nil}
   end
 
-  def resolve(msg) do
+  def resolve(msg, _) do
     case Stun.decode(msg) do
       {:ok,
        %XTools.Stun{
