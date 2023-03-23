@@ -45,7 +45,7 @@ defmodule XTools.SockImpl do
        }, 0}
     else
       _ ->
-        Logger.debug("could not open socket on #{url}")
+        Logger.info("[#{to_string(url)}] could not open socket")
         {:stop, :normal}
     end
   end
@@ -61,7 +61,7 @@ defmodule XTools.SockImpl do
         } = state
       ) do
     Socket.Protocol.close(socket)
-    Logger.info("Task list complete for #{to_string(uri)}")
+    Logger.info("[#{to_string(uri)}] task list complete")
     {:stop, :shutdown, state}
   end
 
@@ -73,7 +73,7 @@ defmodule XTools.SockImpl do
           actions: [action | _]
         } = state
       ) do
-    Logger.debug("calling run on #{inspect(action)}")
+    Logger.info("[#{to_string(uri)}] calling run on #{inspect(action)}")
     {res, key} = action.run(turn_state)
     state = if not is_nil(key), do: Map.put(state, :key, key), else: state
     send(socket, uri, res)
@@ -86,11 +86,11 @@ defmodule XTools.SockImpl do
         %{
           socket: socket,
           key: key,
-          turn_state: turn_state,
+          turn_state: %{uri: uri} = turn_state,
           actions: [action | rest]
         } = state
       ) do
-    Logger.debug("calling resolve for #{inspect(action)}")
+    Logger.info("[#{to_string(uri)}] calling resolve for #{inspect(action)}")
     Socket.Protocol.options(socket, mode: :once)
 
     with {:ok, resp} <- action.resolve(packet, key) do
@@ -110,11 +110,11 @@ defmodule XTools.SockImpl do
         %{
           socket: socket,
           key: key,
-          turn_state: turn_state,
+          turn_state: %{uri: uri} = turn_state,
           actions: [action | rest]
         } = state
       ) do
-    Logger.debug("calling resolve for #{inspect(action)}")
+    Logger.info("[#{to_string(uri)}] calling resolve for #{inspect(action)}")
     Socket.Protocol.options(socket, mode: :once)
 
     with {:ok, resp} <- action.resolve(packet, key) do
@@ -129,12 +129,12 @@ defmodule XTools.SockImpl do
   end
 
   def handle_info(info, state) do
-    Logger.debug("#{inspect(info)}")
+    Logger.info("#{inspect(info)}")
     {:noreply, state, @stack_delay}
   end
 
   def terminate(reason, state) do
-    Logger.debug("#{inspect(reason)}")
+    Logger.info("#{inspect(reason)}")
     {:stop, state}
   end
 

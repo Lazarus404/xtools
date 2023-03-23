@@ -295,7 +295,7 @@ defmodule XTools.Stun do
   end
 
   defp decode_attrs(<<>>, len, _, attrs) do
-    Logger.info("STUN TLV wrong length #{len}")
+    Logger.debug("STUN TLV wrong length #{len}")
     attrs
   end
 
@@ -453,7 +453,7 @@ defmodule XTools.Stun do
   end
 
   defp stringify_attrs(<<>>, length, _, attrs) do
-    Logger.info("STUN TLV wrong length #{length}")
+    Logger.debug("STUN TLV wrong length #{length}")
     attrs
   end
 
@@ -594,7 +594,7 @@ defmodule XTools.Stun do
       {true, <<h::size(16), new_size::size(16), payload::binary>>}
     else
       _ ->
-        Logger.info("MESSAGE-INTEGRITY false.")
+        Logger.debug("MESSAGE-INTEGRITY false.")
         {:error, stun_binary}
     end
   end

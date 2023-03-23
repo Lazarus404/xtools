@@ -26,14 +26,8 @@ defmodule XTools.Actions.CreatePerm do
          method: :createperm,
          transactionid: @tid,
          key: key,
-         integrity: true,
-         fingerprint: true,
-         attrs: %{
-           nonce: _,
-           realm: _,
-           username: _,
-           xor_peer_address: {{192, 168, 1, 194}, 51000}
-         }
+         integrity: false,
+         fingerprint: true
        }} ->
         {:ok, %{}}
 

@@ -31,8 +31,7 @@ defmodule XTools.Actions.Indication do
        }} ->
         {:ok, %{}}
 
-      e ->
-        Logger.debug("#{inspect(e)}")
+      _ ->
         :error
     end
   end

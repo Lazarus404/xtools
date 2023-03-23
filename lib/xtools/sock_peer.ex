@@ -51,7 +51,7 @@ defmodule XTools.SockPeer do
           socket: socket
         } = state
       ) do
-    Logger.debug("channel data received on peer socket")
+    Logger.info("[peer] channel data received on peer socket")
     Socket.Protocol.options(socket, mode: :once)
     ^len = byte_size(@data)
     :gen_udp.send(socket, ip, port, packet)
@@ -64,7 +64,7 @@ defmodule XTools.SockPeer do
           socket: socket
         } = state
       ) do
-    Logger.debug("data received on peer socket")
+    Logger.info("[peer] data received on peer socket")
     Socket.Protocol.options(socket, mode: :once)
     :gen_udp.send(socket, ip, port, packet)
     {:noreply, state}
@@ -76,7 +76,7 @@ defmodule XTools.SockPeer do
           socket: socket
         } = state
       ) do
-    Logger.debug("unknown data received on peer socket #{inspect(packet)}")
+    Logger.info("[peer] unknown data received on peer socket #{inspect(packet)}")
     Socket.Protocol.options(socket, mode: :once)
     {:noreply, state}
   end
@@ -87,13 +87,13 @@ defmodule XTools.SockPeer do
           socket: socket
         } = state
       ) do
-    Logger.debug("data received on peer socket #{inspect(info)}")
+    Logger.info("[peer] data received on peer socket #{inspect(info)}")
     Socket.Protocol.options(socket, mode: :once)
     {:noreply, state}
   end
 
   def terminate(reason, state) do
-    Logger.debug("TCP client closed: #{inspect(reason)}")
+    Logger.info("[peer] TCP client closed: #{inspect(reason)}")
     :ok
   end
 end
